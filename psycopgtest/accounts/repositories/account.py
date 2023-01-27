@@ -2,13 +2,31 @@ import psycopg2
 from accounts.models.account import Account
 from accounts.models.customer import Customer
 
+conn = psycopg2.connect(
+  host="cohort4-team5.ckokfd9swhyk.us-west-2.rds.amazonaws.com",
+    #host="localhost:5432",
+    database="sample",
+    user="postgres",
+    password="password")
+
+cursor = conn.cursor()
+
+cursor.execute('SELECT * FROM information_schema.tables')
+
+rows = cursor.fetchall()
+for table in rows:
+    print(table)
+conn.close()
 
 class AccountRepository():
     def insert(self, account: Account) -> Account:
-        with psycopg2.connect() as db:
+        with psycopg2.connect(host="cohort4-team5.ckokfd9swhyk.us-west-2.rds.amazonaws.com",
+            database="sample",
+            user="postgres",
+            password="password") as db:
             with db.cursor() as cursor:
                 cursor.execute("""
-                    INSERT INTO account 
+                INSERT INTO account 
                         (AccountNumber, CustomerID, CurrentBalance) VALUES
                         (%(account_number)s, %(customer_id)s, %(current_balance)s)
                         RETURNING id
@@ -18,7 +36,7 @@ class AccountRepository():
                     'current_balance': account.current_balance
                 }
                 )
-                account.id = cursor.fetchone()[0]
+            account.id = cursor.fetchone()[0]
         return account
 
     def get_by_account_number(self, account_number: str) -> Account:
